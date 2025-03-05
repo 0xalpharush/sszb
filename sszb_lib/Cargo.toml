@@ -18,7 +18,7 @@ sigp_bls = { package = "bls", git = "https://github.com/paulhauner/lighthouse.gi
 paste = "1.0.15"
 smallvec = "1.13.2"
 typenum = "1.17.0"
-ssz_types = "0.8.3"
+ssz_types = "0.10"
 ethereum_ssz = "0.8.3"
 tree_hash = "0.9"
 tree_hash_derive = "0.9"
