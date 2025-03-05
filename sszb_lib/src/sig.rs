@@ -1,4 +1,4 @@
-use crate::{DecodeError, SszDecode, SszEncode};
+use crate::{DecodeError, SszbDecode, SszbEncode};
 use bytes::buf::{Buf, BufMut};
 use sigp_bls::{PublicKeyBytes, Signature};
 use tree_hash::TreeHash;
@@ -29,7 +29,7 @@ impl TreeHash for PKBytes {
     }
 }
 
-impl SszEncode for PKBytes {
+impl SszbEncode for PKBytes {
     fn is_ssz_static() -> bool {
         true
     }
@@ -57,7 +57,7 @@ impl SszEncode for PKBytes {
     }
 }
 
-impl SszDecode for PKBytes {
+impl SszbDecode for PKBytes {
     fn is_ssz_static() -> bool {
         true
     }
@@ -75,7 +75,7 @@ impl SszDecode for PKBytes {
         _variable_bytes: &mut impl Buf,
     ) -> Result<Self, DecodeError> {
         let len = fixed_bytes.remaining();
-        let expected = <Self as SszDecode>::ssz_fixed_len();
+        let expected = <Self as SszbDecode>::ssz_fixed_len();
 
         if len < expected {
             Err(DecodeError::InvalidByteLength { len, expected })
@@ -114,7 +114,7 @@ impl TreeHash for Sig {
     }
 }
 
-impl SszDecode for Sig {
+impl SszbDecode for Sig {
     fn is_ssz_static() -> bool {
         true
     }
@@ -132,7 +132,7 @@ impl SszDecode for Sig {
         _variable_bytes: &mut impl Buf,
     ) -> Result<Self, DecodeError> {
         let len = fixed_bytes.remaining();
-        let expected = <Self as SszDecode>::ssz_fixed_len();
+        let expected = <Self as SszbDecode>::ssz_fixed_len();
 
         if len < expected {
             Err(DecodeError::InvalidByteLength { len, expected })
@@ -145,7 +145,7 @@ impl SszDecode for Sig {
     }
 }
 
-impl SszEncode for Sig {
+impl SszbEncode for Sig {
     fn is_ssz_static() -> bool {
         true
     }

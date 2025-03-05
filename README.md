@@ -1,7 +1,7 @@
 # sszb
 A high performance SSZ implementation in Rust. Optimised for speed, while retaining flexibility with the `Buf/BufMut` traits.
 
-The library comes with the `SszEncode/SszDecode` traits, and trait implementations for the same types as `ethereum_ssz`.
+The library comes with the `SszbEncode/SszbDecode` traits, and trait implementations for the same types as `ethereum_ssz`.
 
 ## Installation
 
@@ -14,7 +14,7 @@ sszb_derive = { package = "sszb_derive", git = "https://github.com/ghiliweld/ssz
 ## Usage
 
 ```rs
-use sszb::SszDecode;
+use sszb::SszbDecode;
 use sszb_derive::{SszbDecode, SszbEncode};
 
 #[derive(SszbEncode, SszbDecode)]
@@ -28,7 +28,7 @@ pub struct SignedBeaconBlock {
 fn main() {
     let block_bytes: Vec<u8> = std::fs::read("beacon-block.ssz").unwrap();
 
-    let beacon_block = <SignedBeaconBlock as SszDecode>::from_ssz_bytes(bytes).unwrap();
+    let beacon_block = <SignedBeaconBlock as SszbDecode>::from_ssz_bytes(bytes).unwrap();
 
     let encoded_block = beacon_block.to_ssz();
 

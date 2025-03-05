@@ -9,7 +9,7 @@ pub const N: usize = 1_000;
 
 pub use decode::{
     decode_impls::*, read_offset_from_buf, read_offset_from_slice, sanitize_offset, DecodeError,
-    SszDecode,
+    SszbDecode,
 };
 pub use encode::*;
 pub use hash::SszHash;

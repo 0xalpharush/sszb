@@ -1,5 +1,5 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use sszb::{SszDecode, SszEncode};
+use sszb::{SszbDecode, SszbEncode};
 
 pub mod beacon_block;
 pub use beacon_block::SignedBeaconBlock;
@@ -25,7 +25,7 @@ fn basic_types(c: &mut Criterion) {
     group.bench_with_input(
         BenchmarkId::new("Milhouse", "decode"),
         &list_bytes,
-        |b, bytes| b.iter(|| <List<u64, C> as SszDecode>::from_ssz_bytes(bytes).unwrap()),
+        |b, bytes| b.iter(|| <List<u64, C> as SszbDecode>::from_ssz_bytes(bytes).unwrap()),
     );
 
     group.bench_with_input(BenchmarkId::new("Milhouse", "to_ssz"), &list, |b, list| {
@@ -49,13 +49,13 @@ fn beacon_block(c: &mut Criterion) {
     let mut group = c.benchmark_group("SignedBeaconBlock");
     let block_bytes: Vec<u8> = std::fs::read("beacon-block.ssz").unwrap();
     let beacon_block =
-        <SignedBeaconBlock as SszDecode>::from_ssz_bytes(block_bytes.as_slice()).unwrap();
+        <SignedBeaconBlock as SszbDecode>::from_ssz_bytes(block_bytes.as_slice()).unwrap();
     group.throughput(Throughput::Bytes(block_bytes.len() as u64));
 
     group.bench_with_input(
         BenchmarkId::new("Sszb", "decode"),
         block_bytes.as_slice(),
-        |b, bytes| b.iter(|| <SignedBeaconBlock as SszDecode>::from_ssz_bytes(bytes).unwrap()),
+        |b, bytes| b.iter(|| <SignedBeaconBlock as SszbDecode>::from_ssz_bytes(bytes).unwrap()),
     );
 
     group.bench_with_input(
@@ -80,14 +80,14 @@ fn beacon_block(c: &mut Criterion) {
 fn beacon_state(c: &mut Criterion) {
     let mut group = c.benchmark_group("BeaconState");
     let state_bytes: Vec<u8> = std::fs::read("beacon-state.ssz").unwrap();
-    let beacon_state = <BeaconState as SszDecode>::from_ssz_bytes(state_bytes.as_slice()).unwrap();
+    let beacon_state = <BeaconState as SszbDecode>::from_ssz_bytes(state_bytes.as_slice()).unwrap();
     group.throughput(Throughput::Bytes(state_bytes.len() as u64));
     group.sample_size(10);
 
     group.bench_with_input(
         BenchmarkId::new("Sszb", "decode"),
         state_bytes.as_slice(),
-        |b, bytes| b.iter(|| <BeaconState as SszDecode>::from_ssz_bytes(bytes).unwrap()),
+        |b, bytes| b.iter(|| <BeaconState as SszbDecode>::from_ssz_bytes(bytes).unwrap()),
     );
 
     group.bench_with_input(

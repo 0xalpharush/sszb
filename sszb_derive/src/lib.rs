@@ -58,17 +58,17 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
             continue;
         }
 
-        static_stmts.push(quote! { <#ty as sszb::SszEncode>::is_ssz_static() });
-        fixed_len_stmts.push(quote! { <#ty as sszb::SszEncode>::ssz_fixed_len() });
+        static_stmts.push(quote! { <#ty as sszb::SszbEncode>::is_ssz_static() });
+        fixed_len_stmts.push(quote! { <#ty as sszb::SszbEncode>::ssz_fixed_len() });
         bytes_len_stmts.push(quote! { self.#ident.sszb_bytes_len() });
-        max_len_stmts.push(quote! { <#ty as sszb::SszEncode>::ssz_max_len() });
+        max_len_stmts.push(quote! { <#ty as sszb::SszbEncode>::ssz_max_len() });
         ssz_write_fixed_stmts.push(quote! { self.#ident.ssz_write_fixed(offset, buf) });
         write_fixed_stmts.push(quote! { self.#ident.ssz_write_fixed(&mut offset, buf) });
         write_variable_stmts.push(quote! { self.#ident.ssz_write_variable(buf) });
     }
 
     let output = quote! {
-        impl #impl_generics sszb::SszEncode for #name #ty_generics #where_clause {
+        impl #impl_generics sszb::SszbEncode for #name #ty_generics #where_clause {
             fn is_ssz_static() -> bool {
                 #(
                     #static_stmts &&
@@ -77,7 +77,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
             }
 
             fn ssz_fixed_len() -> usize {
-                if <Self as sszb::SszEncode>::is_ssz_static() {
+                if <Self as sszb::SszbEncode>::is_ssz_static() {
                     let mut len: usize = 0;
                     #(
                         len = len
@@ -91,8 +91,8 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
             }
 
             fn sszb_bytes_len(&self) -> usize {
-                if <Self as sszb::SszEncode>::is_ssz_static() {
-                    <Self as sszb::SszEncode>::ssz_fixed_len()
+                if <Self as sszb::SszbEncode>::is_ssz_static() {
+                    <Self as sszb::SszbEncode>::ssz_fixed_len()
                 } else {
                     let mut len: usize = 0;
                     #(
@@ -127,7 +127,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
             fn ssz_write_fixed(&self, offset: &mut usize, buf: &mut impl BufMut) {
                 // if self is fixed-sized then write the data outright
                 // or else we write the offset to the buffer and point to the end of the buffer
-                if <Self as sszb::SszEncode>::is_ssz_static() {
+                if <Self as sszb::SszbEncode>::is_ssz_static() {
                     #(
                         #ssz_write_fixed_stmts;
                     )*
@@ -138,7 +138,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
             }
 
             fn ssz_write_variable(&self, buf: &mut impl BufMut) {
-                if !<Self as sszb::SszEncode>::is_ssz_static() {
+                if !<Self as sszb::SszbEncode>::is_ssz_static() {
                     self.ssz_write(buf);
                 }
             }
@@ -208,11 +208,11 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
             continue;
         }
 
-        static_stmts.push(quote! { <#ty as sszb::SszDecode>::is_ssz_static() });
-        fixed_len_stmts.push(quote! { <#ty as sszb::SszDecode>::ssz_fixed_len() });
-        max_len_stmts.push(quote! { <#ty as sszb::SszDecode>::ssz_max_len() });
+        static_stmts.push(quote! { <#ty as sszb::SszbDecode>::is_ssz_static() });
+        fixed_len_stmts.push(quote! { <#ty as sszb::SszbDecode>::ssz_fixed_len() });
+        max_len_stmts.push(quote! { <#ty as sszb::SszbDecode>::ssz_max_len() });
         read_stmts.push(quote! {
-            #ident: <#ty as sszb::SszDecode>::ssz_read(fixed_bytes, variable_bytes)?
+            #ident: <#ty as sszb::SszbDecode>::ssz_read(fixed_bytes, variable_bytes)?
         });
     }
 
@@ -233,9 +233,9 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
         }
 
         read_stmts_var.push(quote! {
-            #ident: if <#ty as sszb::SszDecode>::is_ssz_static() {
-                fixed_cursor = fixed_cursor.checked_add(<#ty as sszb::SszDecode>::ssz_fixed_len()).expect("overflow");
-                <#ty as sszb::SszDecode>::ssz_read(fixed_bytes, variable_bytes)?
+            #ident: if <#ty as sszb::SszbDecode>::is_ssz_static() {
+                fixed_cursor = fixed_cursor.checked_add(<#ty as sszb::SszbDecode>::ssz_fixed_len()).expect("overflow");
+                <#ty as sszb::SszbDecode>::ssz_read(fixed_bytes, variable_bytes)?
             } else {
                 fixed_cursor = fixed_cursor.checked_add(sszb::BYTES_PER_LENGTH_OFFSET).expect("overflow");
                 let begin = sszb::read_offset_from_buf(fixed_bytes)?;
@@ -272,7 +272,7 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
                     let bytes = &bytes[..field_len];
                     // both the fixed and variable buffers are advanced at this point
                     // even though we don't make a call to ssz_read with them
-                    let res = <#ty as sszb::SszDecode>::from_ssz_bytes(&bytes)?;
+                    let res = <#ty as sszb::SszbDecode>::from_ssz_bytes(&bytes)?;
                     variable_bytes.advance(field_len);
                     res
                 }
@@ -281,7 +281,7 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
     }
 
     let output = quote! {
-        impl #impl_generics sszb::SszDecode for #name #ty_generics #where_clause {
+        impl #impl_generics sszb::SszbDecode for #name #ty_generics #where_clause {
             fn is_ssz_static() -> bool {
                 #(
                     #static_stmts &&
@@ -290,7 +290,7 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
             }
 
             fn ssz_fixed_len() -> usize {
-                if <Self as sszb::SszEncode>::is_ssz_static() {
+                if <Self as sszb::SszbEncode>::is_ssz_static() {
                     let mut len: usize = 0;
                     #(
                         len = len
@@ -314,11 +314,11 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
             }
 
             fn ssz_read(fixed_bytes: &mut impl Buf, variable_bytes: &mut impl Buf) -> Result<Self, sszb::DecodeError>  {
-                if <Self as sszb::SszDecode>::is_ssz_static() {
-                    if fixed_bytes.remaining() < <Self as sszb::SszDecode>::ssz_fixed_len() {
+                if <Self as sszb::SszbDecode>::is_ssz_static() {
+                    if fixed_bytes.remaining() < <Self as sszb::SszbDecode>::ssz_fixed_len() {
                         return Err(sszb::DecodeError::InvalidByteLength {
                             len: fixed_bytes.remaining(),
-                            expected: <Self as sszb::SszDecode>::ssz_fixed_len(),
+                            expected: <Self as sszb::SszbDecode>::ssz_fixed_len(),
                         });
                     }
 
@@ -354,7 +354,7 @@ pub fn derive_decode(input: TokenStream) -> TokenStream {
                     })
                 } else {
                     let (mut fixed_bytes, mut variable_bytes) = bytes.split_at(len);
-                    <Self as SszDecode>::ssz_read(&mut fixed_bytes, &mut variable_bytes)
+                    <Self as SszbDecode>::ssz_read(&mut fixed_bytes, &mut variable_bytes)
                 }
             }
         }

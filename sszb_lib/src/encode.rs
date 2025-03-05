@@ -4,7 +4,7 @@ pub mod encode_impls;
 
 // Most of the complexity in implementing ssz macros arises from offset accounting.
 // Using the BufMut trait means that moving the buffer cursor is taken care of for us.
-pub trait SszEncode {
+pub trait SszbEncode {
     fn is_ssz_static() -> bool;
 
     // all lengths are in number of bytes

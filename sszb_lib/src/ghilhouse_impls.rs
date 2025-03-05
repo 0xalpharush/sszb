@@ -1,6 +1,6 @@
 use crate::{
     read_offset_from_slice, sanitize_offset, ssz_decode_variable_length_items, DecodeError,
-    SszDecode, SszEncode, TryFromIter, BYTES_PER_LENGTH_OFFSET,
+    SszbDecode, SszbEncode, TryFromIter, BYTES_PER_LENGTH_OFFSET,
 };
 use bytes::buf::{Buf, BufMut};
 use ghilhouse::{Error as GhilhouseError, List, Value, Vector};
@@ -9,7 +9,7 @@ use typenum::Unsigned;
 
 impl<T, N> TryFromIter<T> for List<T, N>
 where
-    T: Value + SszDecode,
+    T: Value + SszbDecode,
     N: Unsigned,
 {
     type Error = GhilhouseError;
@@ -21,7 +21,7 @@ where
 
 impl<T, N> TryFromIter<T> for Vector<T, N>
 where
-    T: Value + SszDecode,
+    T: Value + SszbDecode,
     N: Unsigned,
 {
     type Error = GhilhouseError;
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<T: SszEncode + Value, N: Unsigned> SszEncode for List<T, N> {
+impl<T: SszbEncode + Value, N: Unsigned> SszbEncode for List<T, N> {
     fn is_ssz_static() -> bool {
         false
     }
@@ -45,10 +45,10 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for List<T, N> {
     }
 
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * self.len()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * self.len()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * self.len();
             len
         }
@@ -80,7 +80,7 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for List<T, N> {
     }
 }
 
-impl<T: SszDecode + Value, N: Unsigned> SszDecode for List<T, N> {
+impl<T: SszbDecode + Value, N: Unsigned> SszbDecode for List<T, N> {
     fn is_ssz_static() -> bool {
         false
     }
@@ -91,7 +91,7 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for List<T, N> {
 
     fn ssz_max_len() -> usize {
         if T::is_ssz_static() {
-            <T as SszDecode>::ssz_fixed_len() * N::to_usize()
+            <T as SszbDecode>::ssz_fixed_len() * N::to_usize()
         } else {
             let mut len = T::ssz_max_len() * N::to_usize();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
@@ -112,7 +112,7 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for List<T, N> {
         } else if T::is_ssz_static() {
             let num_items = variable_bytes
                 .remaining()
-                .checked_div(<T as SszDecode>::ssz_fixed_len())
+                .checked_div(<T as SszbDecode>::ssz_fixed_len())
                 .ok_or(DecodeError::ZeroLengthItem)?;
 
             if num_items > max_len {
@@ -122,13 +122,13 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for List<T, N> {
                 )));
             }
 
-            // let bytes = variable_bytes.copy_to_bytes(num_items * <T as SszDecode>::ssz_fixed_len());
+            // let bytes = variable_bytes.copy_to_bytes(num_items * <T as SszbDecode>::ssz_fixed_len());
 
             process_results(
                 variable_bytes
                     .chunk()
-                    .chunks_exact(<T as SszDecode>::ssz_fixed_len())
-                    .map(|chunk| <T as SszDecode>::from_ssz_bytes(chunk)),
+                    .chunks_exact(<T as SszbDecode>::ssz_fixed_len())
+                    .map(|chunk| <T as SszbDecode>::from_ssz_bytes(chunk)),
                 |iter| List::try_from_iter(iter),
             )?
             .map_err(|e| DecodeError::BytesInvalid(format!("Error processing results: {:?}", e)))
@@ -171,14 +171,14 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for List<T, N> {
     }
 }
 
-impl<T: SszEncode + Value, N: Unsigned> SszEncode for Vector<T, N> {
+impl<T: SszbEncode + Value, N: Unsigned> SszbEncode for Vector<T, N> {
     fn is_ssz_static() -> bool {
         T::is_ssz_static()
     }
 
     fn ssz_fixed_len() -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
             BYTES_PER_LENGTH_OFFSET
         }
@@ -189,10 +189,10 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for Vector<T, N> {
     }
 
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
             len
         }
@@ -230,14 +230,14 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for Vector<T, N> {
     }
 }
 
-impl<T: SszDecode + Value, N: Unsigned> SszDecode for Vector<T, N> {
+impl<T: SszbDecode + Value, N: Unsigned> SszbDecode for Vector<T, N> {
     fn is_ssz_static() -> bool {
         T::is_ssz_static()
     }
 
     fn ssz_fixed_len() -> usize {
         if T::is_ssz_static() {
-            <T as SszDecode>::ssz_fixed_len() * N::to_usize()
+            <T as SszbDecode>::ssz_fixed_len() * N::to_usize()
         } else {
             BYTES_PER_LENGTH_OFFSET
         }
@@ -245,7 +245,7 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for Vector<T, N> {
 
     fn ssz_max_len() -> usize {
         if T::is_ssz_static() {
-            <T as SszDecode>::ssz_fixed_len() * N::to_usize()
+            <T as SszbDecode>::ssz_fixed_len() * N::to_usize()
         } else {
             let mut len = T::ssz_max_len() * N::to_usize();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
@@ -268,30 +268,30 @@ impl<T: SszDecode + Value, N: Unsigned> SszDecode for Vector<T, N> {
             })?)
         } else if T::is_ssz_static() {
             // T is static, so data resides in fixed_bytes
-            if fixed_bytes.remaining() < len * <T as SszDecode>::ssz_fixed_len() {
+            if fixed_bytes.remaining() < len * <T as SszbDecode>::ssz_fixed_len() {
                 return Err(DecodeError::BytesInvalid(format!(
                     "Vector of {} items not equal to length {}",
                     fixed_bytes
                         .remaining()
-                        .checked_div(<T as SszDecode>::ssz_fixed_len())
+                        .checked_div(<T as SszbDecode>::ssz_fixed_len())
                         .unwrap(),
                     len
                 )));
             }
 
             // create slice of length `len * T::ssz_fixed_len`
-            // let bytes = fixed_bytes.copy_to_bytes(len * <T as SszDecode>::ssz_fixed_len());
-            let bytes = &fixed_bytes.chunk()[..(len * <T as SszDecode>::ssz_fixed_len())];
+            // let bytes = fixed_bytes.copy_to_bytes(len * <T as SszbDecode>::ssz_fixed_len());
+            let bytes = &fixed_bytes.chunk()[..(len * <T as SszbDecode>::ssz_fixed_len())];
 
             let res = process_results(
                 bytes
-                    .chunks_exact(<T as SszDecode>::ssz_fixed_len())
-                    .map(|chunk| <T as SszDecode>::from_ssz_bytes(chunk)),
+                    .chunks_exact(<T as SszbDecode>::ssz_fixed_len())
+                    .map(|chunk| <T as SszbDecode>::from_ssz_bytes(chunk)),
                 |iter| Vector::try_from_iter(iter),
             )?
             .map_err(|e| DecodeError::BytesInvalid(format!("Error processing results: {:?}", e)));
 
-            fixed_bytes.advance(len * <T as SszDecode>::ssz_fixed_len());
+            fixed_bytes.advance(len * <T as SszbDecode>::ssz_fixed_len());
             res
         } else {
             // T is not static so data resides in variable_bytes

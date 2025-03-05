@@ -124,7 +124,7 @@ pub fn sanitize_offset(
     }
 }
 
-pub trait SszDecode: Sized {
+pub trait SszbDecode: Sized {
     fn is_ssz_static() -> bool;
     fn ssz_fixed_len() -> usize;
     fn ssz_max_len() -> usize;

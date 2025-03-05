@@ -1,4 +1,4 @@
-use crate::{SszEncode, BYTES_PER_LENGTH_OFFSET};
+use crate::{SszbEncode, BYTES_PER_LENGTH_OFFSET};
 use alloy_primitives::{Address, Bloom, FixedBytes, U128, U256};
 use bytes::buf::BufMut;
 use ethereum_types::{H160, H256, H32};
@@ -10,7 +10,7 @@ use typenum::Unsigned;
 
 macro_rules! uint_sszb_encode {
     ($type: ident, $bit_size: expr) => {
-        impl SszEncode for $type {
+        impl SszbEncode for $type {
             fn is_ssz_static() -> bool {
                 true
             }
@@ -40,7 +40,7 @@ macro_rules! uint_sszb_encode {
     };
 }
 
-impl SszEncode for u8 {
+impl SszbEncode for u8 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -73,7 +73,7 @@ uint_sszb_encode!(u32, 32);
 uint_sszb_encode!(u64, 64);
 uint_sszb_encode!(u128, 128);
 
-impl SszEncode for bool {
+impl SszbEncode for bool {
     fn is_ssz_static() -> bool {
         true
     }
@@ -101,7 +101,7 @@ impl SszEncode for bool {
     }
 }
 
-impl<const N: usize> SszEncode for [u8; N] {
+impl<const N: usize> SszbEncode for [u8; N] {
     fn is_ssz_static() -> bool {
         true
     }
@@ -129,7 +129,7 @@ impl<const N: usize> SszEncode for [u8; N] {
     }
 }
 
-impl SszEncode for Address {
+impl SszbEncode for Address {
     fn is_ssz_static() -> bool {
         true
     }
@@ -157,7 +157,7 @@ impl SszEncode for Address {
     }
 }
 
-impl<const N: usize> SszEncode for FixedBytes<N> {
+impl<const N: usize> SszbEncode for FixedBytes<N> {
     fn is_ssz_static() -> bool {
         true
     }
@@ -185,7 +185,7 @@ impl<const N: usize> SszEncode for FixedBytes<N> {
     }
 }
 
-impl SszEncode for Bloom {
+impl SszbEncode for Bloom {
     fn is_ssz_static() -> bool {
         true
     }
@@ -213,7 +213,7 @@ impl SszEncode for Bloom {
     }
 }
 
-impl SszEncode for U256 {
+impl SszbEncode for U256 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -241,7 +241,7 @@ impl SszEncode for U256 {
     }
 }
 
-impl SszEncode for U128 {
+impl SszbEncode for U128 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -269,7 +269,7 @@ impl SszEncode for U128 {
     }
 }
 
-impl SszEncode for H32 {
+impl SszbEncode for H32 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -297,7 +297,7 @@ impl SszEncode for H32 {
     }
 }
 
-impl SszEncode for H160 {
+impl SszbEncode for H160 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -325,7 +325,7 @@ impl SszEncode for H160 {
     }
 }
 
-impl SszEncode for H256 {
+impl SszbEncode for H256 {
     fn is_ssz_static() -> bool {
         true
     }
@@ -353,7 +353,7 @@ impl SszEncode for H256 {
     }
 }
 
-impl<N: Unsigned + Clone> SszEncode for BitVector<N> {
+impl<N: Unsigned + Clone> SszbEncode for BitVector<N> {
     fn is_ssz_static() -> bool {
         true
     }
@@ -381,7 +381,7 @@ impl<N: Unsigned + Clone> SszEncode for BitVector<N> {
     }
 }
 
-impl<N: Unsigned + Clone> SszEncode for BitList<N> {
+impl<N: Unsigned + Clone> SszbEncode for BitList<N> {
     fn is_ssz_static() -> bool {
         false
     }
@@ -414,7 +414,7 @@ impl<N: Unsigned + Clone> SszEncode for BitList<N> {
     }
 }
 
-impl<T: SszEncode> SszEncode for Arc<T> {
+impl<T: SszbEncode> SszbEncode for Arc<T> {
     fn is_ssz_static() -> bool {
         T::is_ssz_static()
     }
@@ -444,7 +444,7 @@ impl<T: SszEncode> SszEncode for Arc<T> {
     }
 }
 
-impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentList<T, N> {
+impl<T: SszbEncode + Value, N: Unsigned> SszbEncode for PersistentList<T, N> {
     fn is_ssz_static() -> bool {
         false
     }
@@ -458,10 +458,10 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentList<T, N> {
     }
 
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * self.len()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * self.len()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * self.len();
             len
         }
@@ -493,14 +493,14 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentList<T, N> {
     }
 }
 
-impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentVector<T, N> {
+impl<T: SszbEncode + Value, N: Unsigned> SszbEncode for PersistentVector<T, N> {
     fn is_ssz_static() -> bool {
         T::is_ssz_static()
     }
 
     fn ssz_fixed_len() -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
             BYTES_PER_LENGTH_OFFSET
         }
@@ -511,10 +511,10 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentVector<T, N> {
     }
 
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
             len
         }
@@ -552,7 +552,7 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for PersistentVector<T, N> {
     }
 }
 
-impl<T: SszEncode, N: Unsigned> SszEncode for VariableList<T, N> {
+impl<T: SszbEncode, N: Unsigned> SszbEncode for VariableList<T, N> {
     fn is_ssz_static() -> bool {
         false
     }
@@ -563,10 +563,10 @@ impl<T: SszEncode, N: Unsigned> SszEncode for VariableList<T, N> {
         T::ssz_max_len() * N::to_usize()
     }
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * self.len()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * self.len()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * self.len();
             len
         }
@@ -595,14 +595,14 @@ impl<T: SszEncode, N: Unsigned> SszEncode for VariableList<T, N> {
     }
 }
 
-impl<T: SszEncode, N: Unsigned> SszEncode for FixedVector<T, N> {
+impl<T: SszbEncode, N: Unsigned> SszbEncode for FixedVector<T, N> {
     fn is_ssz_static() -> bool {
         T::is_ssz_static()
     }
 
     fn ssz_fixed_len() -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
             BYTES_PER_LENGTH_OFFSET
         }
@@ -613,10 +613,10 @@ impl<T: SszEncode, N: Unsigned> SszEncode for FixedVector<T, N> {
     }
 
     fn sszb_bytes_len(&self) -> usize {
-        if <T as SszEncode>::is_ssz_static() {
-            <T as SszEncode>::ssz_fixed_len() * N::to_usize()
+        if <T as SszbEncode>::is_ssz_static() {
+            <T as SszbEncode>::ssz_fixed_len() * N::to_usize()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszbEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
             len
         }
