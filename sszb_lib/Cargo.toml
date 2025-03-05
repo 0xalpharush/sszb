@@ -12,7 +12,7 @@ bytes = "1.7.2"
 criterion = "0.5.1"
 ethereum-types = "0.15.1"
 itertools = "0.13.0"
-milhouse = "0.3.0"
+milhouse = "0.5.0"
 ghilhouse = { package = "milhouse", git = "https://github.com/ghiliweld/milhouse.git" }
 sigp_bls = { package = "bls", git = "https://github.com/paulhauner/lighthouse.git", branch = "sszb-compare" }
 paste = "1.0.15"
