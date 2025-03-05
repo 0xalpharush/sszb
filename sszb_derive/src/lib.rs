@@ -90,7 +90,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn ssz_bytes_len(&self) -> usize {
+            fn sszb_bytes_len(&self) -> usize {
                 if <Self as sszb::SszEncode>::is_ssz_static() {
                     <Self as sszb::SszEncode>::ssz_fixed_len()
                 } else {
@@ -99,14 +99,14 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
                         if #static_stmts {
                             len = len
                                 .checked_add(#fixed_len_stmts)
-                                .expect("encode ssz_bytes_len length overflow");
+                                .expect("encode sszb_bytes_len length overflow");
                         } else {
                             len = len
                                 .checked_add(sszb::BYTES_PER_LENGTH_OFFSET)
-                                .expect("encode ssz_bytes_len length overflow for offset");
+                                .expect("encode sszb_bytes_len length overflow for offset");
                             len = len
                                 .checked_add(#bytes_len_stmts)
-                                .expect("encode ssz_bytes_len length overflow for bytes");
+                                .expect("encode ssbz_bytes_len length overflow for bytes");
                         }
                     )*
 
@@ -133,7 +133,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
                     )*
                 } else {
                     buf.put_slice(&offset.to_le_bytes()[0..sszb::BYTES_PER_LENGTH_OFFSET]);
-                    *offset += self.ssz_bytes_len();
+                    *offset += self.sszb_bytes_len();
                 }
             }
 
