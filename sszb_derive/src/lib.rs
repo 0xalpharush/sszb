@@ -60,7 +60,7 @@ pub fn derive_encode(input: TokenStream) -> TokenStream {
 
         static_stmts.push(quote! { <#ty as sszb::SszEncode>::is_ssz_static() });
         fixed_len_stmts.push(quote! { <#ty as sszb::SszEncode>::ssz_fixed_len() });
-        bytes_len_stmts.push(quote! { self.#ident.ssz_bytes_len() });
+        bytes_len_stmts.push(quote! { self.#ident.sszb_bytes_len() });
         max_len_stmts.push(quote! { <#ty as sszb::SszEncode>::ssz_max_len() });
         ssz_write_fixed_stmts.push(quote! { self.#ident.ssz_write_fixed(offset, buf) });
         write_fixed_stmts.push(quote! { self.#ident.ssz_write_fixed(&mut offset, buf) });
