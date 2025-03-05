@@ -42,7 +42,7 @@ impl SszEncode for PKBytes {
         48
     }
 
-    fn ssz_bytes_len(&self) -> usize {
+    fn sszb_bytes_len(&self) -> usize {
         48
     }
 
@@ -158,7 +158,7 @@ impl SszEncode for Sig {
         96
     }
 
-    fn ssz_bytes_len(&self) -> usize {
+    fn sszb_bytes_len(&self) -> usize {
         96
     }
 

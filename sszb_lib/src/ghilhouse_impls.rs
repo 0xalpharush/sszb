@@ -44,11 +44,11 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for List<T, N> {
         T::ssz_max_len() * N::to_usize()
     }
 
-    fn ssz_bytes_len(&self) -> usize {
+    fn sszb_bytes_len(&self) -> usize {
         if <T as SszEncode>::is_ssz_static() {
             <T as SszEncode>::ssz_fixed_len() * self.len()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::ssz_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * self.len();
             len
         }
@@ -56,7 +56,7 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for List<T, N> {
 
     fn ssz_write_fixed(&self, offset: &mut usize, buf: &mut impl BufMut) {
         buf.put_slice(&offset.to_le_bytes()[0..BYTES_PER_LENGTH_OFFSET]);
-        *offset += self.ssz_bytes_len();
+        *offset += self.sszb_bytes_len();
     }
 
     fn ssz_write_variable(&self, buf: &mut impl BufMut) {
@@ -188,11 +188,11 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for Vector<T, N> {
         T::ssz_max_len() * N::to_usize()
     }
 
-    fn ssz_bytes_len(&self) -> usize {
+    fn sszb_bytes_len(&self) -> usize {
         if <T as SszEncode>::is_ssz_static() {
             <T as SszEncode>::ssz_fixed_len() * N::to_usize()
         } else {
-            let mut len = self.iter().map(|item| SszEncode::ssz_bytes_len(item)).sum();
+            let mut len = self.iter().map(|item| SszEncode::sszb_bytes_len(item)).sum();
             len += BYTES_PER_LENGTH_OFFSET * N::to_usize();
             len
         }
@@ -203,7 +203,7 @@ impl<T: SszEncode + Value, N: Unsigned> SszEncode for Vector<T, N> {
             self.ssz_write(buf);
         } else {
             buf.put_slice(&offset.to_le_bytes()[0..BYTES_PER_LENGTH_OFFSET]);
-            *offset += self.ssz_bytes_len();
+            *offset += self.sszb_bytes_len();
         }
     }
 

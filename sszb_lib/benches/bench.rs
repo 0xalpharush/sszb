@@ -36,7 +36,7 @@ fn basic_types(c: &mut Criterion) {
         BenchmarkId::new("Milhouse", "ssz_write to slice"),
         &list,
         |b, list| {
-            let len = list.ssz_bytes_len();
+            let len = list.sszb_bytes_len();
             let mut buf: Vec<u8> = vec![0u8; len];
             b.iter(|| list.ssz_write(&mut buf.as_mut_slice()))
         },
@@ -68,7 +68,7 @@ fn beacon_block(c: &mut Criterion) {
         BenchmarkId::new("Sszb", "ssz_write to slice"),
         &beacon_block,
         |b, block| {
-            let len = block.ssz_bytes_len();
+            let len = block.sszb_bytes_len();
             let mut buf: Vec<u8> = vec![0u8; len];
             b.iter(|| block.ssz_write(&mut buf.as_mut_slice()))
         },
@@ -100,7 +100,7 @@ fn beacon_state(c: &mut Criterion) {
         BenchmarkId::new("Sszb", "ssz_write to slice"),
         &beacon_state,
         |b, state| {
-            let len = state.ssz_bytes_len();
+            let len = state.sszb_bytes_len();
             let mut buf: Vec<u8> = vec![0u8; len];
             b.iter(|| state.ssz_write(&mut buf.as_mut_slice()))
         },

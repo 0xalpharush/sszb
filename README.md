@@ -34,7 +34,7 @@ fn main() {
 
     // if you already have a mutable buffer to write into, you can reuse it to encode your object
     // this saves on allocations
-    let len = beacon_block.ssz_bytes_len();
+    let len = beacon_block.sszb_bytes_len();
     let mut buf: Vec<u8> = vec![0u8; len];
     let encoded_block = beacon_block.ssz_write(&mut buf.as_mut_slice()));
 }
